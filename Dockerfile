@@ -1,20 +1,18 @@
-# 请别再加前端编译了，前端编译非常占用工作流时间 ,可以 编译后复制到static目录再提交pull request
-FROM --platform=$BUILDPLATFORM ghcr.io/rachelos/base-full:latest AS runtime
+# 使用官方 Playwright 镜像作为基础（已包含 Firefox 和所有依赖）
+FROM mcr.microsoft.com/playwright:v1.45.0-focal AS runtime
 
 ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
-ENV INSTALL=True
-ENV BROWSER_TYPE=webkit
 ENV PLANT_PATH=/app/env
 
 WORKDIR /app
 RUN echo "1.0.$(date +%Y%m%d.%H%M)">>docker_version.txt
 COPY requirements.txt install.sh ./
-RUN apt-get update && apt-get install -y --no-install-recommends bash && rm -rf /var/lib/apt/lists/* \
-    && chmod +x /app/install.sh && /app/install.sh
+RUN bash install.sh
 
 COPY . .
-COPY config.example.yaml /app/config.yaml
-RUN chmod +x /app/start.sh
+
+# 确保 Playwright 浏览器已安装
+RUN playwright install firefox
 
 EXPOSE 8001
-CMD ["/app/start.sh"]
+CMD ["bash", "start.sh"]
