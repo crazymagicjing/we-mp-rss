@@ -23,7 +23,7 @@ RUN pip install playwright --no-cache-dir && \
 COPY . .
 
 # 【关键】创建 config.yaml，让应用能正确加载数据库配置
-RUN echo 'db: sqlite:///data/we-mp-rss.db' > /app/config.yaml && \
+RUN echo 'db: ${DATABASE_URL}' > /app/config.yaml && \
     echo 'port: 8001' >> /app/config.yaml && \
     echo 'host: 0.0.0.0' >> /app/config.yaml && \
     echo 'enable_redis: false' >> /app/config.yaml && \
