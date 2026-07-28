@@ -1,18 +1,30 @@
-# 使用官方 Playwright 镜像作为基础（已包含 Firefox 和所有依赖）
-FROM mcr.microsoft.com/playwright:v1.45.0-focal AS runtime
+# 使用 Python 官方镜像作为基础
+FROM python:3.13-slim
 
-ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
-ENV PLANT_PATH=/app/env
+# 安装系统依赖（Playwright 需要）
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    wget \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-RUN echo "1.0.$(date +%Y%m%d.%H%M)">>docker_version.txt
-COPY requirements.txt install.sh ./
-RUN bash install.sh
+# 安装 Playwright 的 Python 包
+RUN pip install playwright --no-cache-dir
 
-COPY . .
-
-# 确保 Playwright 浏览器已安装
+# 安装 Firefox 浏览器（Playwright 会自动下载）
 RUN playwright install firefox
 
+# 设置工作目录
+WORKDIR /app
+
+# 复制项目文件
+COPY . .
+
+# 安装 Python 项目依赖
+RUN pip install -r requirements.txt --no-cache-dir
+
+# 暴露端口
 EXPOSE 8001
+
+# 启动命令（沿用项目原有的 start.sh）
 CMD ["bash", "start.sh"]
