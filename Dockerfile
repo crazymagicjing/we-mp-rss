@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 复制依赖文件并安装 Python 包
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install pymysql --no-cache-dir
 
 # 安装 Playwright 并下载 Firefox
 RUN pip install playwright --no-cache-dir && \
